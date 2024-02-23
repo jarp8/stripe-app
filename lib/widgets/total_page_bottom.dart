@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:stripe_app/bloc/pagar/pagar_bloc.dart';
 
 class TotalPayButton extends StatelessWidget {
 
@@ -22,10 +24,10 @@ class TotalPayButton extends StatelessWidget {
           topRight: Radius.circular(30)
         )
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -34,7 +36,11 @@ class TotalPayButton extends StatelessWidget {
             ],
           ),
 
-          _BtnPay()
+          BlocBuilder<PagarBloc, PagarState>(
+            builder: (context, state) {
+              return _BtnPay(isNormalTarjeta: state.tarjetaActiva,);
+            },
+          )
         ],
       ),
     );
@@ -42,11 +48,13 @@ class TotalPayButton extends StatelessWidget {
 }
 
 class _BtnPay extends StatelessWidget {
-  const _BtnPay();
+  const _BtnPay({required this.isNormalTarjeta});
+
+  final bool isNormalTarjeta;
 
   @override
   Widget build(BuildContext context) {
-    return true
+    return isNormalTarjeta
       ? buildBotonTarjeta(context)
       : buildAppleAndGoolePay(context);
   }
