@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:stripe_app/bloc/pagar/pagar_bloc.dart';
-import 'package:stripe_app/widgets/total_page_bottom.dart';
+import 'package:stripe_app/widgets/total_pay_button.dart';
 
 class TarjetaPage extends StatelessWidget {
   const TarjetaPage({super.key});

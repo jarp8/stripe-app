@@ -3,14 +3,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stripe_app/bloc/pagar/pagar_bloc.dart';
 import 'package:stripe_app/pages/home_page.dart';
 import 'package:stripe_app/pages/pago_completo_page.dart';
+import 'package:stripe_app/services/stripe_service.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+
+    StripeService().init();
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => PagarBloc())
@@ -24,7 +32,7 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: 'home',
         routes: {
-          'home': (_) => const HomePage(),
+          'home': (_) => HomePage(),
           'pago_completo': (_) => PagoCompletoPage()
         },
       ),

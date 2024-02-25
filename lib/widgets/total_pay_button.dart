@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stripe_app/bloc/pagar/pagar_bloc.dart';
+import 'package:stripe_app/helpers/alertas.dart';
+import 'package:stripe_app/services/stripe_service.dart';
 
 class TotalPayButton extends StatelessWidget {
 
@@ -56,12 +59,20 @@ class _BtnPay extends StatelessWidget {
   Widget build(BuildContext context) {
     return isNormalTarjeta
       ? buildBotonTarjeta(context)
-      : buildAppleAndGoolePay(context);
+      : buildAppleAndGooglePay(context);
   }
 
-  Widget buildAppleAndGoolePay(BuildContext context) {
+  Widget buildAppleAndGooglePay(BuildContext context) {
     return MaterialButton(
-      onPressed: () {},
+      onPressed: () async {
+        final stripeService = StripeService();
+        final pagarBlocState = BlocProvider.of<PagarBloc>(context).state;
+
+        final resp = await stripeService.pagarApplePayGooglePay(
+          amount: pagarBlocState.montoPagarString,
+          currency: pagarBlocState.moneda
+        );
+      },
       height: 45,
       minWidth: 150,
       shape: const StadiumBorder(),
@@ -83,7 +94,34 @@ class _BtnPay extends StatelessWidget {
 
   Widget buildBotonTarjeta(BuildContext context) {
     return MaterialButton(
-      onPressed: () {},
+      onPressed: () async {
+        mostrarLoading(context);
+
+        final stripeService = StripeService();
+        final pagarBlocState = BlocProvider.of<PagarBloc>(context).state;
+        final tarjeta = pagarBlocState.tarjeta!;
+        final mesAnio = tarjeta.expiracyDate.split('/');
+
+        final resp = await stripeService.pagarConTarjetaExistente(
+          amount: pagarBlocState.montoPagarString,
+          currency: pagarBlocState.moneda,
+          card: CardDetails(
+            number: tarjeta.cardNumber,
+            expirationMonth: int.parse(mesAnio[0]),
+            expirationYear: int.parse(mesAnio[1]),
+            cvc: tarjeta.cvv
+          )
+        );
+
+        Navigator.pop(context);
+
+        if(resp.ok) {
+          mostrarAlerta(context, 'Tarjeta Ok', 'Todo Correcto');
+        } else {
+          print(resp.message);
+          mostrarAlerta(context, 'Algo salió mal', resp.message!);
+        }
+      },
       height: 45,
       minWidth: 150,
       shape: const StadiumBorder(),
